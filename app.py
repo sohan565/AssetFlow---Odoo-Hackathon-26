@@ -2,90 +2,78 @@ import sys
 import os
 import subprocess
 import time
-import webbrowser
-
-def terminate_process(proc):
-    if not proc:
-        return
-    try:
-        if os.name == 'nt':
-            # On Windows, use taskkill to terminate the process and all its children (node/vite processes)
-            subprocess.run(['taskkill', '/F', '/T', '/PID', str(proc.pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        else:
-            proc.terminate()
-            proc.wait(timeout=2)
-    except Exception:
-        try:
-            proc.kill()
-        except Exception:
-            pass
 
 def main():
     print("=" * 60)
-    print("      ASSETFLOW ERP - UNIFIED ORCHESTRATOR LAUNCHER      ".center(60))
+    print(" Starting AssetFlow - Enterprise Asset & Resource Management System ".center(60, "="))
     print("=" * 60)
-    print("Starting background services. Please wait...")
 
-    backend_proc = None
-    frontend_proc = None
+    # Resolve paths
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    frontend_dir = os.path.join(base_dir, "frontend")
+
+    processes = []
+
+    # 1. Start backend server
+    print("\n[+] Starting FastAPI backend server...")
+    backend_cmd = [sys.executable, "server.py"]
+    try:
+        backend_process = subprocess.Popen(
+            backend_cmd,
+            cwd=base_dir,
+            stdout=None,
+            stderr=None,
+            shell=True if os.name == 'nt' else False
+        )
+        processes.append(backend_process)
+    except Exception as e:
+        print(f"[!] Failed to start backend server: {e}")
+        sys.exit(1)
+
+    # 2. Start frontend dev server
+    print("[+] Starting Vite frontend development server...")
+    npm_cmd = "npm.cmd" if os.name == "nt" else "npm"
+    try:
+        frontend_process = subprocess.Popen(
+            [npm_cmd, "run", "dev"],
+            cwd=frontend_dir,
+            stdout=None,
+            stderr=None,
+            shell=True if os.name == 'nt' else False
+        )
+        processes.append(frontend_process)
+    except Exception as e:
+        print(f"[!] Failed to start frontend server: {e}")
+        backend_process.terminate()
+        sys.exit(1)
+
+    print("\n" + "=" * 60)
+    print("Both servers are running!")
+    print("- Backend API: http://127.0.0.1:8000")
+    print("- Swagger Docs: http://127.0.0.1:8000/docs")
+    print("- Frontend UI: http://localhost:5173")
+    print("Press Ctrl+C to stop both servers.")
+    print("=" * 60 + "\n")
 
     try:
-        # 1. Start Python FastAPI Backend
-        print("\n[+] Launching FastAPI Backend (port 8000)...")
-        backend_env = os.environ.copy()
-        backend_env["PYTHONUNBUFFERED"] = "1"
-        backend_proc = subprocess.Popen(
-            [sys.executable, "server.py"],
-            env=backend_env
-        )
-
-        # 2. Start Frontend Dev Server
-        print("[+] Launching Vite Frontend Dev Server (port 5173)...")
-        frontend_proc = subprocess.Popen(
-            "npm run dev -- --port 5173",
-            shell=True,
-            cwd=os.path.join(os.getcwd(), "frontend")
-        )
-
-        # Give servers a moment to bind to their ports
-        time.sleep(3)
-
-        # Check if backend started successfully
-        if backend_proc.poll() is not None:
-            print("[!] FastAPI Backend failed to start. Check server.py logs.")
-            sys.exit(1)
-
-        # 3. Open Web Browser
-        web_url = "http://localhost:5173"
-        print(f"\n[+] Opening web browser to: {web_url}")
-        webbrowser.open(web_url)
-
-        print("\n" + "=" * 60)
-        print("          SERVICES ARE UP AND RUNNING SUCCESSFULLY          ".center(60))
-        print("=" * 60)
-        print("  - Backend API:   http://localhost:8000/docs")
-        print("  - Frontend App:  http://localhost:5173")
-        print("\n  >> Press CTRL+C at any time to shut down all services cleanly.")
-        print("=" * 60 + "\n")
-
-        # Keep the launcher active and monitor processes
         while True:
+            # Monitor processes
+            for p in processes:
+                if p.poll() is not None:
+                    print(f"\n[!] One of the servers stopped unexpectedly (exit code: {p.returncode}). Exiting...")
+                    raise KeyboardInterrupt
             time.sleep(1)
-            if backend_proc.poll() is not None:
-                print("\n[!] Backend server stopped unexpectedly.")
-                break
-            if frontend_proc.poll() is not None:
-                print("\n[!] Frontend server stopped unexpectedly.")
-                break
-
     except KeyboardInterrupt:
-        print("\n\n[+] Shutdown request received.")
-    finally:
-        print("[+] Terminating backend server...")
-        terminate_process(backend_proc)
-        print("[+] Terminating frontend server...")
-        terminate_process(frontend_proc)
-        print("[+] All services stopped cleanly. Goodbye!")
+        print("\n[+] Stopping servers...")
+        for p in processes:
+            try:
+                if os.name == 'nt':
+                    subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                else:
+                    p.terminate()
+            except Exception:
+                pass
+        print("[+] Both servers stopped. Goodbye!")
 
 if __name__ == "__main__":
     main()
