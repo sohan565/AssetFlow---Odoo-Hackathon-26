@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, ChevronDown, Search, UserCog } from "lucide-react";
+import { Bell, ChevronDown, Search, UserCog, LogOut } from "lucide-react";
 import { NavKey } from "../data";
 import { canAccess, ROLES, useApp } from "../context/AppContext";
 import { StatusPill } from "./BentoCard";
@@ -22,7 +22,7 @@ export function Header({
   active: NavKey;
   onNavigate: (key: NavKey) => void;
 }) {
-  const { role, setRole, currentUser, notifications, markAllRead } = useApp();
+  const { role, setRole, currentUser, notifications, markAllRead, logout } = useApp();
   const [roleOpen, setRoleOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
 
@@ -183,6 +183,13 @@ export function Header({
           <span className="grid place-items-center size-10 rounded-full ring-2 ring-emerald-400/40 bg-white/10 font-[var(--font-display)] text-sm">
             {initials}
           </span>
+          <button
+            onClick={logout}
+            title="Log Out"
+            className="grid place-items-center size-10 rounded-xl border border-border bg-white/[0.03] text-muted-foreground hover:text-rose-300 hover:bg-rose-500/10 hover:border-rose-500/20 transition-all ml-1.5"
+          >
+            <LogOut className="size-4.5" />
+          </button>
         </div>
       </div>
 
