@@ -153,12 +153,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const assetByTag = (tag: string) =>
       assets.find((a) => a.assetTag.toLowerCase() === tag.trim().toLowerCase());
 
-    const loginWithGoogle = async (idToken: string) => {
+    const loginWithGoogle = async (idToken: string, desiredRole: string) => {
       try {
         const res = await fetch("/api/auth/google", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id_token: idToken })
+          body: JSON.stringify({ id_token: idToken, role: desiredRole })
         });
         if (!res.ok) throw new Error("Google Login Failed");
         const data = await res.json();
