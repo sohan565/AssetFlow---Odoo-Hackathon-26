@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://assetflow-odoo-hackathon-26.onrender.com"
+    }
+  ]
+}
