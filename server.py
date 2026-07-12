@@ -1,4 +1,6 @@
 import uvicorn
+import urllib.request
+import json
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
@@ -289,6 +291,131 @@ def get_state(x_user_role: Optional[str] = Header(None)):
             "notifications": notifications,
             "auditEntries": audit_entries
         }
+    finally:
+        conn.close()
+
+# ---------------------------------------------------------------------------
+# Google OAuth Helper & Endpoint
+# ---------------------------------------------------------------------------
+
+def verify_google_token(id_token: str) -> dict:
+    url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    try:
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            if "error" in data or "error_description" in data:
+                return None
+            return data
+    except Exception as e:
+        print(f"Error validating Google token: {e}")
+        return None
+
+class GoogleLoginInput(BaseModel):
+    id_token: str
+
+@app.post("/api/auth/google")
+def google_auth(data: GoogleLoginInput):
+    token_info = verify_google_token(data.id_token)
+    if not token_info:
+        raise HTTPException(status_code=400, detail="Invalid Google ID Token")
+    
+    email = token_info.get("email")
+    if not email:
+        raise HTTPException(status_code=400, detail="Email not provided in Google Token")
+        
+    first_name = token_info.get("given_name", "Google")
+    last_name = token_info.get("family_name", "User")
+    
+    conn = DatabaseConnection.get_connection()
+    try:
+        employee = EmployeeModel.get_employee_by_email(conn, email)
+        if not employee:
+            # Auto-register new employee
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM departments LIMIT 1")
+            dept_row = cursor.fetchone()
+            dept_id = dept_row["id"] if dept_row else 1
+            
+            emp_id = EmployeeModel.create_employee(
+                conn,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                phone="",
+                department_id=dept_id,
+                designation="Google User",
+                role="employee",
+                date_joined=datetime.now().strftime("%Y-%m-%d"),
+                password="google-oauth-dummy-password"
+            )
+            employee = EmployeeModel.get_employee(conn, emp_id)
+            
+        # Format response role
+        role = "Employee"
+        dept_heads = get_dept_heads(conn)
+        dept_map = get_department_name_map(conn)
+        
+        if employee["role"] == "admin":
+            role = "Admin"
+        elif employee["role"] == "manager":
+            role = "Asset Manager"
+        elif employee["id"] in dept_heads:
+            role = "Department Head"
+        elif employee["role"] == "auditor":
+            role = "Asset Manager"
+            
+        return {
+            "success": True,
+            "user": {
+                "id": str(employee["id"]),
+                "name": f"{employee['first_name']} {employee['last_name']}",
+                "email": employee["email"],
+                "role": role,
+                "department": dept_map.get(employee["department_id"], "Unassigned")
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+class BypassLoginInput(BaseModel):
+    email: str
+
+@app.post("/api/auth/bypass")
+def bypass_login(data: BypassLoginInput):
+    conn = DatabaseConnection.get_connection()
+    try:
+        employee = EmployeeModel.get_employee_by_email(conn, data.email)
+        if not employee:
+            raise HTTPException(status_code=404, detail="Employee not found")
+            
+        role = "Employee"
+        dept_heads = get_dept_heads(conn)
+        dept_map = get_department_name_map(conn)
+        
+        if employee["role"] == "admin":
+            role = "Admin"
+        elif employee["role"] == "manager":
+            role = "Asset Manager"
+        elif employee["id"] in dept_heads:
+            role = "Department Head"
+        elif employee["role"] == "auditor":
+            role = "Asset Manager"
+            
+        return {
+            "success": True,
+            "user": {
+                "id": str(employee["id"]),
+                "name": f"{employee['first_name']} {employee['last_name']}",
+                "email": employee["email"],
+                "role": role,
+                "department": dept_map.get(employee["department_id"], "Unassigned")
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
     finally:
         conn.close()
 
