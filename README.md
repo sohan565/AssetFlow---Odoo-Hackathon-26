@@ -1,8 +1,37 @@
-# AssetFlow — Enterprise Asset & Resource Management System
+# 🏆 Odoo Hackathon '26 - Virtual Round: AssetFlow
+
+This repository is set up for the **Odoo Hackathon '26 — Virtual Round** for the project **AssetFlow (Enterprise Asset & Resource Management System)**.
+
+---
+
+## 📅 Hackathon Guidelines & Submission Instructions (Team Leader & Members)
+
+### 🚨 Critical Deadlines & Submission
+* **Repository Submission**: The team leader must submit this public GitHub repository link in the portal under **“Submit Problem Solution”** before **10:00 AM**.
+* **Evaluator Access**: Add your assigned evaluator as a collaborator in this GitHub repository settings (refer to Page 5 of the documentation).
+* **Demo Video**: After the coding period ends, submit an open-access demo video link (public or "anyone with the link").
+  - Covers only the functional flow of your application.
+  - Maximum duration: **5 minutes**.
+
+### 💻 Git & Collaboration Rules
+* **Frequency**: All team members are expected to push their code to the repository at least once **every 1 hour** to track progress and synchronize work.
+* **Branches**: Your latest and working code must always reside in the **`main`** branch.
+* **Commit Ownership**: Every team member must commit their own code. Points will be assigned based on individual commits.
+* **Commit Messages**: Write meaningful commit messages explaining clearly what was done.
+
+### 🔗 Reference Documents & Links
+* **Process Documentation**: [Hackathon Registration/Virtual Round Process](https://drive.google.com/file/d/1ObaJUCzrLh8naphSDSgi9qh9TOe1YKgz/view?usp=sharing)
+* **Full Documentation Folder**: [Google Drive Folder](https://drive.google.com/drive/folders/1vVv97oF6wPrljV9c6j1eBa09kcA_H3hd?usp=sharing)
+* **Our Expectations**: [Expectations Document](https://drive.google.com/file/d/1qHbCAjJZUqeNZEGMrSOvu1d7l8qhbTMo/view?usp=sharing)
+* **Updates**: Join the Discord server for real-time announcements (refer to Page 5 of the documentation).
+
+---
+
+## 📋 AssetFlow — Enterprise Asset & Resource Management System
 
 AssetFlow is a centralized, role-based Enterprise Resource Planning (ERP) platform designed to simplify, track, allocate, and maintain an organization's physical assets and shared resources. By shifting from manual spreadsheets and paper logs, AssetFlow establishes structured asset lifecycles, booking schedules, conflict-preventing allocations, and transparent audit workflows.
 
-## 🚀 Key Features
+### 🚀 Key Features to Implement
 
 1. **Login & Role-based Signup**
    - Direct registration of standard Employee accounts.
@@ -65,44 +94,3 @@ AssetFlow is a centralized, role-based Enterprise Resource Planning (ERP) platfo
 | **Perform Audit Cycles** | ✅ | ✅ | ❌ | ❌ |
 | **Book Shared Resources** | ✅ | ✅ | ✅ (on behalf) | ✅ |
 | **Raise Maintenance Requests** | ✅ | ✅ | ✅ | ✅ |
-
----
-
-## 🛠️ Technology Stack
-
-- **Frontend Core**: React 19, TypeScript
-- **Styling**: Modern, responsive Vanilla CSS (custom design system)
-- **Icons**: Lucide React
-- **Build System**: Vite 8
-- **Linter**: Oxlint
-
----
-
-## ⚙️ Quick Start & Installation
-
-To run this application locally, follow these steps:
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18.0.0 or higher recommended)
-- [npm](https://www.npmjs.com/) (v9.0.0 or higher)
-
-### Setup & Run
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-2. Start the local development server:
-   ```bash
-   npm run dev
-   ```
-
-3. Open the browser and visit:
-   ```
-   http://localhost:5173
-   ```
-
-4. Build for production:
-   ```bash
-   npm run build
-   ```
