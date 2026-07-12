@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 
 import { getAudits, checkAuditAsset, completeAudit, getAssets } from '../services/api';
 import type { Audit, Asset } from '../services/types';
@@ -164,7 +164,7 @@ export const AssetAudit: React.FC = () => {
                     <div className="flex-grow">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-bold text-indigo-400 font-mono">{asset.tag}</span>
-                        <span className="text-[10px] text-slate-500">• {asset.categoryName}</span>
+                        <span className="text-[10px] text-slate-500">ΓÇó {asset.categoryName}</span>
                       </div>
                       <h4 className="text-xs font-bold text-slate-250 mt-1 font-outfit">{asset.name}</h4>
                       <p className="text-[10px] text-slate-500 mt-1">Current Status: <span className="text-slate-400 font-semibold">{asset.status}</span> | Loc: <span className="text-slate-400">{asset.location}</span></p>
@@ -224,14 +224,14 @@ export const AssetAudit: React.FC = () => {
               <ClipboardCheck className="w-4.5 h-4.5 text-indigo-400" /> Auditor Instructions
             </h3>
             <div className="text-xs text-slate-400 flex flex-col gap-3.5 leading-relaxed font-medium">
-              <p>📍 Complete the checklist by verifying the location and physical status of every non-decommissioned corporate asset.</p>
+              <p>≡ƒôì Complete the checklist by verifying the location and physical status of every non-decommissioned corporate asset.</p>
               <p className="bg-rose-950/20 border border-rose-900/30 p-3 rounded-xl text-rose-400">
-                ⚠️ Marking an asset as <span className="font-bold">"Missing"</span> immediately updates the SQLite state engine, setting status to <span className="font-bold">"Lost"</span> and dispatching alerts to administrators.
+                ΓÜá∩╕Å Marking an asset as <span className="font-bold">"Missing"</span> immediately updates the SQLite state engine, setting status to <span className="font-bold">"Lost"</span> and dispatching alerts to administrators.
               </p>
               <p className="bg-amber-950/20 border border-amber-900/30 p-3 rounded-xl text-amber-400">
-                🔧 Marking an asset as <span className="font-bold">"Damaged"</span> automatically logs a maintenance request under the hub and shifts the status to <span className="font-bold">"Under Maintenance"</span>.
+                ≡ƒöº Marking an asset as <span className="font-bold">"Damaged"</span> automatically logs a maintenance request under the hub and shifts the status to <span className="font-bold">"Under Maintenance"</span>.
               </p>
-              <p>📄 Finalizing compiles details into the corporate discrepancy report and saves it to SQLite database archives.</p>
+              <p>≡ƒôä Finalizing compiles details into the corporate discrepancy report and saves it to SQLite database archives.</p>
             </div>
           </div>
 
@@ -257,7 +257,7 @@ export const AssetAudit: React.FC = () => {
                       <h4 className="text-xs font-bold text-slate-200 font-outfit">{aud.title}</h4>
                       <div className="text-[10px] text-slate-500 mt-1 flex items-center gap-2.5">
                         <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-slate-500" /> Planned: {aud.scheduledDate}</span>
-                        <span>• Auditor: {aud.auditorName}</span>
+                        <span>ΓÇó Auditor: {aud.auditorName}</span>
                       </div>
                     </div>
 

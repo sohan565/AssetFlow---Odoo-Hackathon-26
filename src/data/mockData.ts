@@ -1,4 +1,4 @@
-import type { Department, Category, Employee, Asset, Allocation, Booking, Maintenance, Audit, SystemNotification } from '../services/types';
+﻿import type { Department, Category, Employee, Asset, Allocation, Booking, Maintenance, Audit, SystemNotification } from '../services/types';
 
 export const mockDepartments: Department[] = [
   { id: 'dept-1', name: 'Engineering', code: 'ENG', headId: 'emp-3' },

@@ -1,4 +1,4 @@
-export type UserRole = 'Admin' | 'Asset Manager' | 'Department Head' | 'Employee';
+﻿export type UserRole = 'Admin' | 'Asset Manager' | 'Department Head' | 'Employee';
 
 export type AssetStatus = 
   | 'Available' 

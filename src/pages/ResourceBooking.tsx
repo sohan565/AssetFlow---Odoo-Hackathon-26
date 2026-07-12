@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   getAssets, 
@@ -118,7 +118,7 @@ export const ResourceBooking: React.FC = () => {
     const endTime = end.toLocaleTimeString([], timeOpt);
 
     if (startDate === endDate) {
-      return `${startDate} • ${startTime} - ${endTime}`;
+      return `${startDate} ΓÇó ${startTime} - ${endTime}`;
     }
     return `${startDate} ${startTime} - ${endDate} ${endTime}`;
   };
@@ -251,7 +251,7 @@ export const ResourceBooking: React.FC = () => {
                         <h4 className="text-sm font-bold text-slate-200 font-outfit">{bkg.title}</h4>
                         <p className="text-[10px] text-indigo-450 mt-1 flex items-center gap-1 font-semibold">
                           <span className="font-mono bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20">{bkg.assetTag}</span> 
-                          • {bkg.assetName}
+                          ΓÇó {bkg.assetName}
                         </p>
                       </div>
 
