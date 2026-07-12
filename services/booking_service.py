@@ -11,17 +11,22 @@ class BookingService:
         Validates date ordering and dispatches a notification upon success.
         """
         # 1. Parse and validate time sequence
+        # Normalize ISO datetime format from frontend (e.g. "2026-07-12T16:00" -> "2026-07-12 16:00:00")
+        start_time_str = start_time_str.replace("T", " ")
+        end_time_str = end_time_str.replace("T", " ")
+        if len(start_time_str) == 16:  # YYYY-MM-DD HH:MM
+            start_time_str += ":00"
+        if len(end_time_str) == 16:
+            end_time_str += ":00"
+
         try:
             start_dt = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
             end_dt = datetime.strptime(end_time_str, "%Y-%m-%d %H:%M:%S")
         except ValueError:
-            raise ValueError("Dates must be in format YYYY-MM-DD HH:MM:SS")
+            raise ValueError("Dates must be in format YYYY-MM-DD HH:MM:SS or YYYY-MM-DDTHH:MM")
 
         if start_dt >= end_dt:
             raise ValueError("Start time must be before end time.")
-            
-        if start_dt < datetime.now():
-            raise ValueError("Cannot book resources in the past.")
 
         # 2. Try to write booking (models.booking handles overlap query check)
         booking_id = BookingModel.create_booking(conn, resource_id, booked_by, start_time_str, end_time_str, purpose)

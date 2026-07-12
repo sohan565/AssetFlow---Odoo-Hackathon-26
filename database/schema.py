@@ -161,6 +161,7 @@ CREATE TABLE IF NOT EXISTS maintenance_requests (
     status TEXT DEFAULT 'Pending Approval',
     estimated_cost REAL,
     actual_cost REAL,
+    technician TEXT,
     submitted_at TEXT DEFAULT CURRENT_TIMESTAMP,
     resolved_at TEXT,
     FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE,

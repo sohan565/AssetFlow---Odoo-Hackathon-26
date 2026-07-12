@@ -631,10 +631,21 @@ def update_ticket_status(ticket_id: str, data: UpdateTicketStatusInput):
         if data.status == "Resolved":
             MaintenanceModel.resolve_maintenance_request(conn, t_id)
         elif data.status == "In Progress":
+            # Auto-approve if currently Pending Approval to flip asset status to Under Maintenance
+            cursor = conn.cursor()
+            cursor.execute("SELECT status FROM maintenance_requests WHERE id = ?", (t_id,))
+            req = cursor.fetchone()
+            if req and req["status"] == "Pending Approval":
+                MaintenanceModel.approve_maintenance_request(conn, t_id, 1, "Approved", "Auto-approved on start")
             MaintenanceModel.assign_technician_and_start(conn, t_id, "Internal Tech")
         elif data.status == "Reported":
-            # Reset to Pending Approval
+            # Reset to Pending Approval and return asset to Available
             cursor = conn.cursor()
+            cursor.execute("SELECT asset_id FROM maintenance_requests WHERE id = ?", (t_id,))
+            req = cursor.fetchone()
+            if req:
+                from models.asset import AssetModel
+                AssetModel.update_asset_state(conn, req["asset_id"], "Available", 1, "Reset to Reported")
             cursor.execute("UPDATE maintenance_requests SET status = 'Pending Approval' WHERE id = ?", (t_id,))
             conn.commit()
         return {"success": True}

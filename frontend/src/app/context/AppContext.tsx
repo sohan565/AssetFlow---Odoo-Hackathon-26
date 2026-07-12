@@ -68,6 +68,7 @@ interface AppState {
   assetByTag: (tag: string) => Asset | undefined;
 
   registerAsset: (a: Omit<Asset, "id">) => Promise<void>;
+  allocateAsset: (assetId: string, employeeId: string, expectedReturnDate: string) => Promise<void>;
   returnAsset: (assetId: string) => Promise<void>;
   addBooking: (b: Omit<Booking, "id" | "status">) => Promise<void>;
   setBookingStatus: (id: string, status: Booking["status"]) => Promise<void>;
@@ -153,12 +154,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const assetByTag = (tag: string) =>
       assets.find((a) => a.assetTag.toLowerCase() === tag.trim().toLowerCase());
 
-    const loginWithGoogle = async (idToken: string, desiredRole: string) => {
+    const loginWithGoogle = async (idToken: string, selectedRole: string) => {
       try {
         const res = await fetch("/api/auth/google", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id_token: idToken, role: desiredRole })
+          body: JSON.stringify({ id_token: idToken, role: selectedRole })
         });
         if (!res.ok) throw new Error("Google Login Failed");
         const data = await res.json();
@@ -223,6 +224,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
             body: JSON.stringify(a)
           });
           if (!res.ok) throw new Error("Failed to register asset");
+          await fetchData();
+        } catch (err) {
+          console.error(err);
+        }
+      },
+
+      allocateAsset: async (assetId, employeeId, expectedReturnDate) => {
+        try {
+          const res = await fetch("/api/allocations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ assetId, employeeId, expectedReturnDate })
+          });
+          if (!res.ok) throw new Error("Failed to allocate asset");
           await fetchData();
         } catch (err) {
           console.error(err);

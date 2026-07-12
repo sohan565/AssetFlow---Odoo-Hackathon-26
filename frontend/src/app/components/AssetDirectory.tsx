@@ -30,11 +30,13 @@ const STATUSES: (AssetStatus | "All")[] = [
 ];
 
 export function AssetDirectory() {
-  const { assets, registerAsset, returnAsset } = useApp();
+  const { assets, registerAsset, returnAsset, allocateAsset, employees } = useApp();
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<AssetCategory | "All">("All");
   const [status, setStatus] = useState<AssetStatus | "All">("All");
   const [open, setOpen] = useState(false);
+  const [allocOpen, setAllocOpen] = useState(false);
+  const [selectedAssetId, setSelectedAssetId] = useState<string>("");
 
   const [form, setForm] = useState({
     name: "",
@@ -42,6 +44,11 @@ export function AssetDirectory() {
     category: "Hardware" as AssetCategory,
     location: "",
     purchaseValue: "",
+  });
+
+  const [allocForm, setAllocForm] = useState({
+    employeeId: "",
+    expectedReturnDate: "",
   });
 
   const filtered = assets.filter((a) => {
@@ -65,6 +72,14 @@ export function AssetDirectory() {
     });
     setForm({ name: "", assetTag: "", category: "Hardware", location: "", purchaseValue: "" });
     setOpen(false);
+  };
+
+  const submitAllocation = () => {
+    const targetEmployeeId = allocForm.employeeId || (employees[0]?.id ?? "");
+    if (!selectedAssetId || !targetEmployeeId) return;
+    allocateAsset(selectedAssetId, targetEmployeeId, allocForm.expectedReturnDate);
+    setAllocForm({ employeeId: "", expectedReturnDate: "" });
+    setAllocOpen(false);
   };
 
   return (
@@ -167,7 +182,14 @@ export function AssetDirectory() {
               ) : a.status === "Retired" ? (
                 <span className="text-sm text-muted-foreground">Retired</span>
               ) : (
-                <button className="rounded-xl border border-purple-400/30 bg-purple-400/10 px-3.5 py-2 text-sm text-purple-200 hover:bg-purple-400/15 transition-colors">
+                <button
+                  onClick={() => {
+                    setSelectedAssetId(a.id);
+                    setAllocForm({ employeeId: employees[0]?.id ?? "", expectedReturnDate: "" });
+                    setAllocOpen(true);
+                  }}
+                  className="rounded-xl border border-purple-400/30 bg-purple-400/10 px-3.5 py-2 text-sm text-purple-200 hover:bg-purple-400/15 transition-colors"
+                >
                   Allocate asset
                 </button>
               )}
@@ -252,6 +274,45 @@ export function AssetDirectory() {
               />
             </Field>
           </div>
+        </div>
+      </Modal>
+
+      <Modal
+        open={allocOpen}
+        onClose={() => setAllocOpen(false)}
+        title="Allocate Asset"
+        subtitle="Assign this asset to an employee."
+        footer={
+          <>
+            <GhostButton onClick={() => setAllocOpen(false)}>Cancel</GhostButton>
+            <PrimaryButton onClick={submitAllocation}>
+              Allocate Asset
+            </PrimaryButton>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <Field label="Employee">
+            <select
+              className={inputClass}
+              value={allocForm.employeeId || (employees[0]?.id ?? "")}
+              onChange={(e) => setAllocForm({ ...allocForm, employeeId: e.target.value })}
+            >
+              {employees.map((e) => (
+                <option key={e.id} value={e.id} className="bg-[#10141d]">
+                  {e.name} ({e.role} - {e.department})
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Expected Return Date">
+            <input
+              type="date"
+              className={inputClass}
+              value={allocForm.expectedReturnDate}
+              onChange={(e) => setAllocForm({ ...allocForm, expectedReturnDate: e.target.value })}
+            />
+          </Field>
         </div>
       </Modal>
     </div>
