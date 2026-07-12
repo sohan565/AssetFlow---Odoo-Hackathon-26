@@ -5,9 +5,14 @@ interface LoginProps {
   onBypass: (mockUserEmail: string) => void;
 }
 
+// Paste your Google Client ID here so it works on all devices out-of-the-box:
+const DEFAULT_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID_HERE";
+
 export function Login({ onLoginSuccess, onBypass }: LoginProps) {
   const [clientId, setClientId] = useState(() => {
-    return localStorage.getItem("assetflow_google_client_id") || "";
+    return DEFAULT_CLIENT_ID !== "YOUR_GOOGLE_CLIENT_ID_HERE"
+      ? DEFAULT_CLIENT_ID
+      : (localStorage.getItem("assetflow_google_client_id") || "");
   });
   const [selectedRole, setSelectedRole] = useState("Employee");
   const [showConfig, setShowConfig] = useState(false);
