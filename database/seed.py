@@ -33,10 +33,10 @@ def seed_database():
         # Password for all accounts is 'password123'
         pass_hash = hash_password("password123")
         employees = [
-            ("EMP-0001", "Alice", "Admin", "alice@company.com", "123456", 1, "IT Admin", "admin", "2026-01-01", pass_hash),
-            ("EMP-0002", "Bob", "Manager", "bob@company.com", "234567", 1, "Asset Manager", "manager", "2026-01-05", pass_hash),
-            ("EMP-0003", "Charlie", "Depthead", "charlie@company.com", "345678", 1, "Engineering Head", "employee", "2026-01-10", pass_hash),
-            ("EMP-0004", "David", "Auditor", "david@company.com", "456789", 3, "Internal Auditor", "auditor", "2026-02-01", pass_hash),
+            ("EMP-0001", "Sohan", "Admin", "sohan@company.com", "123456", 1, "IT Admin", "admin", "2026-01-01", pass_hash),
+            ("EMP-0002", "Gautam", "Manager", "gautam@company.com", "234567", 1, "Asset Manager", "manager", "2026-01-05", pass_hash),
+            ("EMP-0003", "Vansh", "Depthead", "vansh@company.com", "345678", 1, "Engineering Head", "employee", "2026-01-10", pass_hash),
+            ("EMP-0004", "Deep", "Auditor", "deep@company.com", "456789", 3, "Internal Auditor", "auditor", "2026-02-01", pass_hash),
             ("EMP-0005", "Eve", "Staff", "eve@company.com", "567890", 1, "Software Engineer", "employee", "2026-02-15", pass_hash)
         ]
         cursor.executemany(

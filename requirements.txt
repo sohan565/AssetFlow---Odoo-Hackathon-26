@@ -1,5 +1,3 @@
-# Python Standard Library only is required.
-# If you expand this to a web server (like FastAPI), you can add:
-# fastapi
-# uvicorn
-# pydantic
+fastapi
+uvicorn
+pydantic

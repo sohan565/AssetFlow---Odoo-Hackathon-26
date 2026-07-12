@@ -104,6 +104,25 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_single_active_allocation
 ON asset_allocations(asset_id)
 WHERE returned_at IS NULL;
 
+-- 6b. Transfer Requests Table
+CREATE TABLE IF NOT EXISTS transfer_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    asset_id INTEGER NOT NULL,
+    from_employee_id INTEGER NOT NULL,
+    to_employee_id INTEGER NOT NULL,
+    requested_by INTEGER NOT NULL,
+    status TEXT DEFAULT 'Pending' CHECK (status IN ('Pending', 'Approved', 'Rejected')),
+    comments TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    decided_at TEXT,
+    decided_by INTEGER,
+    FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE,
+    FOREIGN KEY (from_employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+    FOREIGN KEY (to_employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+    FOREIGN KEY (requested_by) REFERENCES employees(id) ON DELETE CASCADE,
+    FOREIGN KEY (decided_by) REFERENCES employees(id) ON DELETE SET NULL
+);
+
 -- 7. Shared Resources Table
 CREATE TABLE IF NOT EXISTS shared_resources (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -241,6 +260,7 @@ CREATE INDEX IF NOT EXISTS idx_maintenance_asset ON maintenance_requests(asset_i
 
 CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON notifications(recipient_id, is_read);
 CREATE INDEX IF NOT EXISTS idx_state_log_asset ON asset_state_log(asset_id);
+CREATE INDEX IF NOT EXISTS idx_transfers_asset ON transfer_requests(asset_id);
 """
 
 def initialize_database():
