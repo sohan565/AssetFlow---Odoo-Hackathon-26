@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 interface LoginProps {
-  onLoginSuccess: (idToken: string) => void;
+  onLoginSuccess: (idToken: string, selectedRole: string) => void;
   onBypass: (mockUserEmail: string) => void;
 }
 
@@ -9,6 +9,7 @@ export function Login({ onLoginSuccess, onBypass }: LoginProps) {
   const [clientId, setClientId] = useState(() => {
     return localStorage.getItem("assetflow_google_client_id") || "";
   });
+  const [selectedRole, setSelectedRole] = useState("Employee");
   const [showConfig, setShowConfig] = useState(false);
 
   // Load Google script dynamically
@@ -24,7 +25,7 @@ export function Login({ onLoginSuccess, onBypass }: LoginProps) {
     fjs.parentNode?.insertBefore(js, fjs);
   }, []);
 
-  // Initialize and render Google button when script loads and client ID is present
+  // Initialize and render Google button when script loads, client ID, or selected role changes
   useEffect(() => {
     if (!clientId) return;
 
@@ -40,7 +41,7 @@ export function Login({ onLoginSuccess, onBypass }: LoginProps) {
         (window as any).google.accounts.id.initialize({
           client_id: clientId,
           callback: (response: any) => {
-            onLoginSuccess(response.credential);
+            onLoginSuccess(response.credential, selectedRole);
           },
         });
 
@@ -60,7 +61,7 @@ export function Login({ onLoginSuccess, onBypass }: LoginProps) {
     };
 
     initGoogle();
-  }, [clientId, onLoginSuccess]);
+  }, [clientId, onLoginSuccess, selectedRole]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md px-4">
@@ -93,8 +94,23 @@ export function Login({ onLoginSuccess, onBypass }: LoginProps) {
 
         {/* Client ID Configured Section */}
         {clientId ? (
-          <div className="flex flex-col items-center justify-center gap-4 mb-6">
-            <div id="google-signin-button" className="min-h-[44px]" />
+          <div className="flex flex-col items-center justify-center gap-4 mb-6 w-full">
+            <div className="w-full flex flex-col gap-1.5 text-left">
+              <label className="text-xs font-semibold text-muted-foreground/80">
+                Select your sign-in role:
+              </label>
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none cursor-pointer focus:border-emerald-400/50 hover:bg-white/[0.02] transition-all"
+              >
+                <option value="Admin">Admin</option>
+                <option value="Asset Manager">Asset Manager</option>
+                <option value="Department Head">Department Head</option>
+                <option value="Employee">Employee</option>
+              </select>
+            </div>
+            <div id="google-signin-button" className="min-h-[44px] mt-2" />
             <button
               onClick={() => setShowConfig(true)}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"

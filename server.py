@@ -313,6 +313,7 @@ def verify_google_token(id_token: str) -> dict:
 
 class GoogleLoginInput(BaseModel):
     id_token: str
+    role: str
 
 @app.post("/api/auth/google")
 def google_auth(data: GoogleLoginInput):
@@ -326,6 +327,15 @@ def google_auth(data: GoogleLoginInput):
         
     first_name = token_info.get("given_name", "Google")
     last_name = token_info.get("family_name", "User")
+    
+    # Map input role to database role
+    db_role = "employee"
+    if data.role == "Admin":
+        db_role = "admin"
+    elif data.role == "Asset Manager":
+        db_role = "manager"
+    elif data.role == "Department Head":
+        db_role = "employee"
     
     conn = DatabaseConnection.get_connection()
     try:
@@ -345,11 +355,28 @@ def google_auth(data: GoogleLoginInput):
                 phone="",
                 department_id=dept_id,
                 designation="Google User",
-                role="employee",
+                role=db_role,
                 date_joined=datetime.now().strftime("%Y-%m-%d"),
                 password="google-oauth-dummy-password"
             )
             employee = EmployeeModel.get_employee(conn, emp_id)
+        else:
+            # Update role in database
+            EmployeeModel.promote_employee(conn, employee["id"], db_role)
+            
+        # Handle Department Head linkage
+        cursor = conn.cursor()
+        if data.role == "Department Head":
+            # Set this user as head of the first department
+            cursor.execute("UPDATE departments SET head_employee_id = ? WHERE id = (SELECT id FROM departments LIMIT 1)", (employee["id"],))
+            conn.commit()
+        else:
+            # If they selected a different role, ensure they are not set as head of any department
+            cursor.execute("UPDATE departments SET head_employee_id = NULL WHERE head_employee_id = ?", (employee["id"],))
+            conn.commit()
+
+        # Re-fetch employee to get updated role
+        employee = EmployeeModel.get_employee(conn, employee["id"])
             
         # Format response role
         role = "Employee"
