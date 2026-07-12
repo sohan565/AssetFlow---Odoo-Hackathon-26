@@ -15,6 +15,7 @@ export function Login({ onLoginSuccess, onBypass }: LoginProps) {
       : (localStorage.getItem("assetflow_google_client_id") || "");
   });
   const [selectedRole, setSelectedRole] = useState("Employee");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
 
   // Load Google script dynamically
@@ -100,20 +101,53 @@ export function Login({ onLoginSuccess, onBypass }: LoginProps) {
         {/* Client ID Configured Section */}
         {clientId ? (
           <div className="flex flex-col items-center justify-center gap-4 mb-6 w-full">
-            <div className="w-full flex flex-col gap-1.5 text-left">
+            <div className="w-full flex flex-col gap-1.5 text-left relative">
               <label className="text-xs font-semibold text-muted-foreground/80">
                 Select your sign-in role:
               </label>
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none cursor-pointer focus:border-emerald-400/50 hover:bg-white/[0.02] transition-all"
+              <button
+                type="button"
+                onClick={() => setDropdownOpen((o) => !o)}
+                className="w-full flex items-center justify-between rounded-xl border border-border bg-white/[0.03] px-3.5 py-2.5 text-sm text-foreground hover:bg-white/[0.06] transition-colors outline-none focus:border-emerald-400/50"
               >
-                <option value="Admin">Admin</option>
-                <option value="Asset Manager">Asset Manager</option>
-                <option value="Department Head">Department Head</option>
-                <option value="Employee">Employee</option>
-              </select>
+                <span>{selectedRole}</span>
+                <svg
+                  className={`size-4 text-muted-foreground transition-transform duration-200 ${dropdownOpen ? "rotate-180 text-emerald-300" : ""}`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              
+              {dropdownOpen && (
+                <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 rounded-xl border border-border bg-card/95 backdrop-blur-xl p-1.5 shadow-2xl">
+                  {["Admin", "Asset Manager", "Department Head", "Employee"].map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => {
+                        setSelectedRole(r);
+                        setDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between rounded-lg px-2.5 py-2 text-sm transition-colors ${
+                        selectedRole === r
+                          ? "bg-emerald-400/10 text-emerald-200 font-medium"
+                          : "text-muted-foreground hover:text-foreground hover:bg-white/[0.03]"
+                      }`}
+                    >
+                      {r}
+                      {selectedRole === r && (
+                        <span className="size-2 rounded-full bg-emerald-400" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <div id="google-signin-button" className="min-h-[44px] mt-2" />
             <button
