@@ -6,17 +6,22 @@ import { ResourceBooking } from "./components/ResourceBooking";
 import { MaintenanceHub } from "./components/MaintenanceHub";
 import { AuditingWorkspace } from "./components/AuditingWorkspace";
 import { OrganizationSetup } from "./components/OrganizationSetup";
+import { Login } from "./components/Login";
 import { NavKey } from "./data";
 import { AppProvider, canAccess, useApp } from "./context/AppContext";
 
 function Workspace() {
-  const { role } = useApp();
+  const { role, user, loginWithGoogle, loginWithBypass } = useApp();
   const [nav, setNav] = useState<NavKey>("dashboard");
 
   // If the active role loses access to the current page, fall back to dashboard.
   useEffect(() => {
     if (!canAccess(role, nav)) setNav("dashboard");
   }, [role, nav]);
+
+  if (!user) {
+    return <Login onLoginSuccess={loginWithGoogle} onBypass={loginWithBypass} />;
+  }
 
   return (
     <div className="min-h-screen w-full text-foreground">

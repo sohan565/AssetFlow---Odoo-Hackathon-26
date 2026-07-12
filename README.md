@@ -61,7 +61,19 @@ hackathon/
 
 ## 🛠️ How to Run the Project
 
-Follow these steps to set up and run both the backend and frontend development environments on your machine:
+Follow these steps to set up and run both the backend and frontend development environments on your machine.
+
+### ⚡ Quick Start (Run Backend & Frontend Together)
+
+If you have already installed the backend dependencies (Step 1.1), frontend dependencies (Step 2.1), and seeded the database (Step 1.2), you can start both servers simultaneously using:
+
+```bash
+python app.py
+```
+
+This convenience script runs both the FastAPI backend and Vite frontend development servers in parallel, monitors their status, and cleanly shuts both down when you press `Ctrl+C`.
+
+---
 
 ### 1. Backend Setup (Python FastAPI)
 

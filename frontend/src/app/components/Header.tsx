@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, ChevronDown, Search, UserCog } from "lucide-react";
+import { Bell, ChevronDown, Search, UserCog, LogOut } from "lucide-react";
 import { NavKey } from "../data";
 import { canAccess, ROLES, useApp } from "../context/AppContext";
 import { StatusPill } from "./BentoCard";
@@ -22,7 +22,7 @@ export function Header({
   active: NavKey;
   onNavigate: (key: NavKey) => void;
 }) {
-  const { role, setRole, currentUser, notifications, markAllRead } = useApp();
+  const { role, setRole, currentUser, notifications, markAllRead, logout } = useApp();
   const [roleOpen, setRoleOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
 
@@ -174,15 +174,22 @@ export function Header({
           )}
         </div>
 
-        {/* Avatar */}
+        {/* Avatar and Logout */}
         <div className="flex items-center gap-2.5 pl-1">
           <div className="hidden sm:block text-right leading-tight">
             <div className="text-sm">{currentUser.name}</div>
             <div className="text-xs text-muted-foreground">{currentUser.role}</div>
           </div>
-          <span className="grid place-items-center size-10 rounded-full ring-2 ring-emerald-400/40 bg-white/10 font-[var(--font-display)] text-sm">
+          <span className="grid place-items-center size-10 rounded-full ring-2 ring-emerald-400/40 bg-white/10 font-[var(--font-display)] text-sm font-semibold text-emerald-300">
             {initials}
           </span>
+          <button
+            onClick={logout}
+            title="Log Out"
+            className="grid place-items-center size-9 rounded-xl border border-border bg-white/[0.03] text-muted-foreground hover:text-rose-400 hover:border-rose-400/30 transition-colors ml-1 shrink-0"
+          >
+            <LogOut className="size-4" />
+          </button>
         </div>
       </div>
 

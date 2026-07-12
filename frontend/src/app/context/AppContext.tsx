@@ -50,6 +50,10 @@ interface AppState {
   role: Role;
   setRole: (r: Role) => void;
   currentUser: Employee;
+  user: Employee | null;
+  loginWithGoogle: (idToken: string) => Promise<void>;
+  loginWithBypass: (email: string) => Promise<void>;
+  logout: () => void;
 
   employees: Employee[];
   assets: Asset[];
@@ -77,6 +81,10 @@ const AppContext = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>("Admin");
+  const [user, setUser] = useState<Employee | null>(() => {
+    const saved = localStorage.getItem("assetflow_user");
+    return saved ? JSON.parse(saved) : null;
+  });
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [allocations, setAllocations] = useState<Allocation[]>([]);
@@ -84,6 +92,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [tickets, setTickets] = useState<MaintenanceTicket[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [auditEntries, setAuditEntries] = useState<AuditEntry[]>([]);
+
+  // Automatically update role when user logs in/changes
+  useEffect(() => {
+    if (user) {
+      setRole(user.role);
+    }
+  }, [user]);
 
   // Load state from backend API
   const fetchData = async () => {
@@ -107,10 +122,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Run on mount and role change
+  // Run on mount and role/auth change
   useEffect(() => {
     fetchData();
-  }, [role]);
+  }, [role, user]);
 
   // Periodic polling for alerts/notifications
   useEffect(() => {
@@ -119,15 +134,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       fetchData();
     }, 5000);
     return () => clearInterval(interval);
-  }, [role]);
+  }, [role, user]);
 
-  // The signed-in user follows the selected role (for demo/testing).
+  // The signed-in user defaults to the authenticated user, but can follow the selected role (for demo/testing).
   const currentUser = useMemo(() => {
-    if (employees.length === 0) {
-      return { id: "1", name: "System User", role: role, department: "Operations" };
-    }
-    return employees.find((e) => e.role === role) ?? employees[0];
-  }, [role, employees]);
+    const baseUser = user || (employees.length > 0 ? employees[0] : { id: "1", name: "System User", role: "Employee" as Role, department: "Operations" });
+    return {
+      ...baseUser,
+      role: role
+    };
+  }, [role, employees, user]);
 
   const value = useMemo<AppState>(() => {
     const employeeName = (id: string) =>
@@ -137,10 +153,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const assetByTag = (tag: string) =>
       assets.find((a) => a.assetTag.toLowerCase() === tag.trim().toLowerCase());
 
+    const loginWithGoogle = async (idToken: string, desiredRole: string) => {
+      try {
+        const res = await fetch("/api/auth/google", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id_token: idToken, role: desiredRole })
+        });
+        if (!res.ok) throw new Error("Google Login Failed");
+        const data = await res.json();
+        if (data.success && data.user) {
+          setUser(data.user);
+          localStorage.setItem("assetflow_user", JSON.stringify(data.user));
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to authenticate with Google.");
+      }
+    };
+
+    const loginWithBypass = async (email: string) => {
+      try {
+        const res = await fetch("/api/auth/bypass", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        if (!res.ok) throw new Error("Bypass Login Failed");
+        const data = await res.json();
+        if (data.success && data.user) {
+          setUser(data.user);
+          localStorage.setItem("assetflow_user", JSON.stringify(data.user));
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to log in with bypass account.");
+      }
+    };
+
+    const logout = () => {
+      setUser(null);
+      localStorage.removeItem("assetflow_user");
+    };
+
     return {
       role,
       setRole,
       currentUser,
+      user,
+      loginWithGoogle,
+      loginWithBypass,
+      logout,
       employees,
       assets,
       allocations,
@@ -262,7 +325,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       },
     };
-  }, [role, currentUser, employees, assets, allocations, bookings, tickets, notifications, auditEntries]);
+  }, [role, currentUser, user, employees, assets, allocations, bookings, tickets, notifications, auditEntries]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
